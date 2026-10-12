@@ -16,60 +16,123 @@ ASSETS = Path(__file__).parent / "assets"
 
 CSS = """
 <style>
+:root { --ink: #222222; --muted: #666666; --faint: #8C8C8A; --line: #E8E8E8;
+        --line-soft: #F0F0EE; --wash: #FAFAFA; --yellow: #F5C518; --ease: cubic-bezier(.2,.7,.2,1); }
+
 /* Content starts below Streamlit's fixed 60px top bar. */
 [data-testid="stMainBlockContainer"] { padding-top: 4.5rem; padding-bottom: 3rem; max-width: 1360px; }
 [data-testid="stSidebarContent"] { padding-top: 0.4rem; }
+[data-testid="stSidebar"] { border-right: 1px solid var(--line); }
 [data-testid="stSidebar"] hr { margin: 0.6rem 0; }
-h1, h2, h3 { letter-spacing: -0.01em; }
-.stPlotlyChart { border-top: 1px solid #262626; padding-top: 4px; }
+[data-testid="stHeader"] { background: rgba(255,255,255,0.92); backdrop-filter: blur(6px); }
+h1, h2, h3 { letter-spacing: -0.01em; color: var(--ink); }
+.stPlotlyChart { border-top: 1px solid var(--line-soft); padding-top: 4px; }
 
-.app-header { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; padding-bottom: 14px;
-              border-bottom: 1px solid #2A2A2A; margin-bottom: 18px; }
+/* Sidebar navigation: quiet hover, thin yellow marker on the active page. */
+[data-testid="stSidebarNavLink"] { position: relative; border-radius: 4px;
+    transition: background-color .18s ease, color .18s ease; }
+[data-testid="stSidebarNavLink"]:hover { background: #F2F2F0; }
+[data-testid="stSidebarNavLink"][aria-current="page"] { background: #FFFFFF;
+    box-shadow: inset 0 0 0 1px var(--line); }
+[data-testid="stSidebarNavLink"][aria-current="page"]::before { content: ""; position: absolute;
+    left: 0; top: 7px; bottom: 7px; width: 2px; border-radius: 2px; background: var(--yellow); }
+.stButton button, [data-testid="stBaseButton-secondary"] {
+    transition: border-color .18s ease, background-color .18s ease, color .18s ease; }
+[data-testid="stBaseButton-secondary"]:hover { border-color: var(--yellow); color: var(--ink); }
+/* Yellow text is unreadable on white: keep the yellow on tracks and borders, not on text. */
+[data-testid="stSliderThumbValue"], [data-testid="stSliderThumbValue"] *,
+[data-testid="stSliderTickBarMin"], [data-testid="stSliderTickBarMax"],
+button[data-variant="pills"][aria-pressed="true"], button[data-variant="pills"][aria-pressed="true"] * {
+    color: var(--ink) !important; }
+button[data-variant="pills"] { transition: border-color .18s ease; }
+button[data-variant="pills"]:hover { border-color: var(--yellow); }
+
+.app-header { position: relative; display: flex; flex-wrap: wrap; align-items: center;
+              gap: 10px 18px; padding-bottom: 14px; border-bottom: 1px solid var(--line);
+              margin-bottom: 18px; }
+.app-header::after { content: ""; position: absolute; left: 0; bottom: -1px; width: 56px;
+                     height: 2px; background: var(--yellow); transform-origin: left;
+                     animation: grow-x .7s var(--ease) .15s both; }
 .app-header img { height: 38px; width: auto; display: block; }
 .app-header .badge { background: #F5C518; color: #000; font-weight: 800; font-size: 20px;
                      padding: 4px 9px; border-radius: 4px; letter-spacing: -0.02em; }
 .app-header .titles { flex: 1 1 320px; min-width: 0; }
-.app-header .name { color: #F2F0EC; font-size: 22px; font-weight: 650; line-height: 1.15; }
-.app-header .sub { color: #9A9893; font-size: 13.5px; margin-top: 2px; }
-.app-header .source { color: #7A7874; font-size: 12px; text-align: right; line-height: 1.5;
+.app-header .name { color: var(--ink); font-size: 22px; font-weight: 650; line-height: 1.15; }
+.app-header .sub { color: var(--muted); font-size: 13.5px; margin-top: 2px; }
+.app-header .source { color: var(--faint); font-size: 12px; text-align: right; line-height: 1.5;
                        margin-left: auto; }
-.app-header .source a { color: #9A9893; text-decoration: underline; text-underline-offset: 2px; }
+.app-header .source a { color: var(--muted); text-decoration: underline; text-underline-offset: 2px;
+                         text-decoration-color: #CFCFCC; transition: text-decoration-color .18s ease; }
+.app-header .source a:hover { text-decoration-color: var(--yellow); }
 @media (max-width: 720px) { .app-header .source { display: none; } }
 
 .page-head { margin: 4px 0 10px 0; }
-.page-head .h { color: #F2F0EC; font-size: 26px; font-weight: 650; letter-spacing: -0.015em; }
-.page-head .scope { color: #9A9893; font-size: 13px; margin-top: 4px; }
-.page-head .scope b { color: #F5C518; font-weight: 600; }
+.page-head .h { color: var(--ink); font-size: 26px; font-weight: 650; letter-spacing: -0.015em; }
+.page-head .scope { color: var(--muted); font-size: 13px; margin-top: 4px; }
+.page-head .scope b { color: var(--ink); font-weight: 600;
+                      box-shadow: inset 0 -0.38em 0 rgba(245,197,24,.45); }
 
 .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        border-top: 1px solid #2A2A2A; border-bottom: 1px solid #2A2A2A; margin: 6px 0 22px 0; }
-.kpi { padding: 14px 18px 14px 18px; border-left: 1px solid #2A2A2A; min-width: 0; }
+        border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin: 6px 0 22px 0; }
+.kpi { padding: 14px 18px 14px 18px; border-left: 1px solid var(--line); min-width: 0; }
 .kpi:first-child { border-left: none; padding-left: 2px; }
-.kpi .l { color: #9A9893; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.06em; }
-.kpi .v { color: #F2F0EC; font-size: 26px; font-weight: 650; margin-top: 4px;
+.kpi .l { color: var(--muted); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.06em; }
+.kpi .v { color: var(--ink); font-size: 26px; font-weight: 650; margin-top: 4px;
           font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden;
           text-overflow: ellipsis; }
-.kpi .v.accent { color: #F5C518; }
+.kpi .v.accent { color: var(--ink); }
+.kpi .v.accent::after { content: ""; display: block; width: 18px; height: 2px; margin-top: 5px;
+                        background: var(--yellow); }
 .kpi .v.small { font-size: 15px; line-height: 1.3; padding-top: 5px; white-space: normal;
                 display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-.kpi .n { color: #7A7874; font-size: 12px; margin-top: 3px; }
+.kpi .n { color: var(--faint); font-size: 12px; margin-top: 3px; }
 
-.section { color: #F2F0EC; font-size: 17px; font-weight: 600; margin: 26px 0 2px 0; }
-.section-note { color: #8A8884; font-size: 12.5px; margin-bottom: 8px; }
+.section { color: var(--ink); font-size: 17px; font-weight: 600; margin: 26px 0 2px 0; }
+.section-note { color: var(--muted); font-size: 12.5px; margin-bottom: 8px; }
 
-.detail-title { color: #F2F0EC; font-size: 24px; font-weight: 650; line-height: 1.2; }
-.detail-meta { color: #9A9893; font-size: 13.5px; margin-top: 6px; }
-.detail-rating { font-size: 34px; font-weight: 700; color: #F5C518;
+.detail-title { color: var(--ink); font-size: 24px; font-weight: 650; line-height: 1.2; }
+.detail-meta { color: var(--muted); font-size: 13.5px; margin-top: 6px; }
+.detail-rating { font-size: 34px; font-weight: 700; color: var(--ink);
                  font-variant-numeric: tabular-nums; line-height: 1; }
-.detail-rating span { font-size: 15px; color: #9A9893; font-weight: 500; }
-.tag { display: inline-block; margin-bottom: 12px; border: 1px solid #3A3A38; color: #C9C7C2; border-radius: 3px;
-       padding: 1px 7px; font-size: 12px; margin: 6px 6px 0 0; }
+.detail-rating::before { content: "★"; color: var(--yellow); font-size: 26px; margin-right: 6px;
+                         vertical-align: 3px; }
+.detail-rating span { font-size: 15px; color: var(--muted); font-weight: 500; }
+.tag { display: inline-block; margin-bottom: 12px; border: 1px solid #DDDDDA; color: #444444; border-radius: 3px;
+       padding: 1px 7px; font-size: 12px; margin: 6px 6px 0 0; background: #FFFFFF; }
 .credit-row { display: grid; grid-template-columns: 110px 1fr; gap: 10px; padding: 7px 0;
-              border-bottom: 1px solid #232323; font-size: 13.5px; }
-.credit-row .k { color: #8A8884; }
-.credit-row .val { color: #E8E6E3; }
-.credit-row .val i { color: #8A8884; font-style: normal; }
+              border-bottom: 1px solid var(--line-soft); font-size: 13.5px; }
+.credit-row .k { color: var(--muted); }
+.credit-row .val { color: var(--ink); }
+.credit-row .val i { color: var(--faint); font-style: normal; }
+
+/* Entrance: a short fade-up when a block first mounts. Transform only, so no layout shift. */
+.app-header, .page-head, .kpis, .section, .stPlotlyChart, [data-testid="stDataFrame"] {
+    animation: rise .45s var(--ease) both; }
+.kpis { animation-delay: .06s; }
+@keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes grow-x { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+/* A few slow yellow shapes in the page margins; never on top of controls. */
+.drift { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.drift i { position: absolute; display: block; border-radius: 50%; background: var(--yellow);
+           opacity: .16; will-change: transform; animation: drift 26s ease-in-out infinite alternate; }
+.drift i:nth-child(1) { width: 10px; height: 10px; right: 2.2%; top: 22%; }
+.drift i:nth-child(2) { width: 6px;  height: 6px;  right: 4.5%; top: 64%; animation-duration: 34s;
+                        animation-delay: -9s; }
+.drift i:nth-child(3) { width: 14px; height: 14px; right: 1.2%; bottom: 8%; border-radius: 2px;
+                        opacity: .10; animation-duration: 40s; animation-delay: -17s; }
+@keyframes drift { from { transform: translate(0, 0) rotate(0deg); }
+                   to   { transform: translate(-14px, -36px) rotate(40deg); } }
+@media (max-width: 1100px) { .drift { display: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .app-header, .page-head, .kpis, .section, .stPlotlyChart, [data-testid="stDataFrame"],
+  .app-header::after { animation: none !important; }
+  .drift { display: none; }
+  * { transition: none !important; }
+}
 </style>
+<div class="drift" aria-hidden="true"><i></i><i></i><i></i></div>
 """
 
 

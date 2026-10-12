@@ -102,7 +102,7 @@ def _profile(cat, person):
                 if len(rated) else None)
     st.markdown(f'<div class="detail-title" style="margin-top:10px">{html.escape(person["name"])}</div>'
                 f'<div class="detail-meta"><a href="{ui.person_url(int(person["nid"]))}" '
-                f'target="_blank" style="color:#9A9893">IMDb profile ↗</a></div>',
+                f'target="_blank" style="color:#666666">IMDb profile ↗</a></div>',
                 unsafe_allow_html=True)
     ui.kpi_strip([
         ("Credited titles", ui.fmt_int(len(credits)), "in this dashboard's catalogue", ""),

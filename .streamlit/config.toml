@@ -1,20 +1,20 @@
 [theme]
-base = "dark"
+base = "light"
 primaryColor = "#F5C518"
-backgroundColor = "#121212"
-secondaryBackgroundColor = "#1E1E1E"
-textColor = "#E8E6E3"
-linkColor = "#F5C518"
-borderColor = "#2A2A2A"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F4F4F2"
+textColor = "#222222"
+linkColor = "#8A6A00"
+borderColor = "#E8E8E8"
 showWidgetBorder = true
 baseRadius = "4px"
 font = "'Inter':https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap, system-ui, sans-serif"
 headingFontWeights = 650
-dataframeHeaderBackgroundColor = "#1A1A1A"
+dataframeHeaderBackgroundColor = "#FAFAFA"
 
 [theme.sidebar]
-backgroundColor = "#181818"
-secondaryBackgroundColor = "#242424"
+backgroundColor = "#FAFAFA"
+secondaryBackgroundColor = "#F0F0EE"
 
 [server]
 runOnSave = false

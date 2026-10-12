@@ -8,18 +8,18 @@ import plotly.graph_objects as go
 import plotly.io as pio
 
 YELLOW = "#F5C518"
-INK = "#E8E6E3"
-MUTED = "#9A9893"
-FAINT = "#5C5B58"
-GRID = "#262626"
-SURFACE = "#181818"
-CONTEXT = "#4A4A48"   # de-emphasised marks (e.g. "all titles" behind "rated")
-# Categorical order, validated for colour-vision deficiency on #181818.
+INK = "#222222"
+MUTED = "#666666"
+FAINT = "#A3A3A0"
+GRID = "#EDEDEB"
+SURFACE = "#FFFFFF"
+CONTEXT = "#D3D3D0"   # de-emphasised marks (e.g. "all titles" behind "rated")
+# Categorical order, validated for colour-vision deficiency.
 # Yellow is the brand accent and always slot 1; colours follow the entity.
 SERIES = [YELLOW, "#3987E5", "#D95926", "#199E70", "#9085E9", "#E66767"]
-# Single-hue sequential ramp (dark -> brand yellow) for heatmaps.
-SEQUENTIAL = [[0, "#1F1F1E"], [0.25, "#3D3412"], [0.5, "#7A6312"],
-              [0.75, "#BB9416"], [1, YELLOW]]
+# Single-hue sequential ramp (page background -> brand yellow) for heatmaps.
+SEQUENTIAL = [[0, "#F4F3EF"], [0.25, "#F3E2A0"], [0.5, "#F4D366"],
+              [0.75, "#F5CA35"], [1, YELLOW]]
 
 PLOTLY_CONFIG = {
     "displaylogo": False,
@@ -35,11 +35,11 @@ pio.templates["imdb"] = go.layout.Template(layout=go.Layout(
     plot_bgcolor="rgba(0,0,0,0)",
     colorway=SERIES,
     margin=dict(l=8, r=12, t=78, b=8),
-    xaxis=dict(gridcolor=GRID, linecolor="#3A3A38", zeroline=False, ticks="",
+    xaxis=dict(gridcolor=GRID, linecolor="#D6D6D4", zeroline=False, ticks="",
                title=dict(font=dict(size=12, color=MUTED)), automargin=True),
     yaxis=dict(gridcolor=GRID, linecolor="rgba(0,0,0,0)", zeroline=False, ticks="",
                title=dict(font=dict(size=12, color=MUTED)), automargin=True),
-    hoverlabel=dict(bgcolor="#232323", bordercolor="#3A3A38",
+    hoverlabel=dict(bgcolor="#FFFFFF", bordercolor="#E2E2E0",
                     font=dict(family="Inter, system-ui, sans-serif", size=12, color=INK)),
     legend=dict(orientation="h", x=1, xanchor="right", y=1.0, yanchor="bottom",
                 bgcolor="rgba(0,0,0,0)", font=dict(color=MUTED)),
@@ -88,12 +88,12 @@ def titles_per_year(df: pd.DataFrame, partial_year: int | None = None,
     fig.update_xaxes(title_text=None)
     if partial_year is not None and partial_year in set(df["year"]):
         fig.add_vrect(x0=partial_year - 0.5, x1=partial_year + 0.5,
-                      fillcolor="#FFFFFF", opacity=0.05, line_width=0,
+                      fillcolor="#000000", opacity=0.04, line_width=0,
                       annotation_text="partial year", annotation_position="top left",
                       annotation_font=dict(size=11, color=MUTED))
     if rangeslider:
         fig.update_xaxes(rangeslider=dict(visible=True, thickness=0.07,
-                                          bgcolor="#1E1E1E", bordercolor=GRID))
+                                          bgcolor="#FAFAFA", bordercolor=GRID))
     return _titled(fig, "Titles released per year",
                    "Bars count every title in the selection, rated or not", height)
 
@@ -287,10 +287,10 @@ def released_vs_rated(df: pd.DataFrame, partial_year: int | None) -> go.Figure:
     fig.update_layout(hovermode="x unified")
     fig.update_yaxes(title_text="Titles", tickformat="~s")
     fig.update_xaxes(title_text=None, rangeslider=dict(visible=True, thickness=0.07,
-                                                       bgcolor="#1E1E1E", bordercolor=GRID))
+                                                       bgcolor="#FAFAFA", bordercolor=GRID))
     if partial_year is not None and partial_year in set(df["year"]):
-        fig.add_vrect(x0=partial_year - 1, x1=partial_year, fillcolor="#FFFFFF",
-                      opacity=0.05, line_width=0)
+        fig.add_vrect(x0=partial_year - 1, x1=partial_year, fillcolor="#000000",
+                      opacity=0.04, line_width=0)
     return _titled(fig, "Released and rated titles per year",
                    "A title only gets a rating once it has 5 or more votes", height=380)
 
