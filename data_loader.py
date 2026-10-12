@@ -268,13 +268,23 @@ def build_cache(sources: dict[str, Path], log=print) -> dict:
     return meta
 
 
+def setting(name: str) -> str | None:
+    """Read a deployment setting from the environment or Streamlit secrets."""
+    if os.environ.get(name):
+        return os.environ[name]
+    try:
+        return st.secrets.get(name)
+    except Exception:  # no secrets.toml configured
+        return None
+
+
 def download_cache(repo_id: str) -> None:
     """Fetch a prebuilt cache from a (private) Hugging Face dataset repo.
     Used on deployments, where the 10 GB of raw TSVs are not available."""
     from huggingface_hub import snapshot_download
     snapshot_download(repo_id, repo_type="dataset", local_dir=CACHE_DIR,
                       allow_patterns=["*.parquet", "meta.json"],
-                      token=os.environ.get("HF_TOKEN"))
+                      token=setting("HF_TOKEN"))
 
 
 def ensure_cache() -> dict:
@@ -283,7 +293,7 @@ def ensure_cache() -> dict:
     meta_path = CACHE_DIR / "meta.json"
     if "basics" not in sources:
         # No raw files: use the prebuilt cache, downloading it if needed.
-        repo = os.environ.get("IMDB_HF_DATASET")
+        repo = setting("IMDB_HF_DATASET")
         if not meta_path.exists() and repo:
             with st.spinner("Downloading prepared IMDb data..."):
                 download_cache(repo)
