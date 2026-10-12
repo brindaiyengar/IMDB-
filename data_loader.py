@@ -22,6 +22,9 @@ from pathlib import Path
 
 import duckdb
 import pandas as pd
+import pyarrow as pa
+import pyarrow.compute as pc
+import pyarrow.parquet as pq
 import streamlit as st
 
 DATA_DIR = Path(os.environ.get("IMDB_DATA_DIR", Path(__file__).parent))
@@ -319,17 +322,24 @@ class Catalog:
     snapshot: str
 
 
-@st.cache_data(show_spinner="Loading titles...")
+# cache_resource, not cache_data: one shared read-only frame instead of a
+# pickled copy per rerun, which ran the 1 GB-class cloud hosts out of memory.
+@st.cache_resource(show_spinner="Loading titles...")
 def load_titles(fingerprint: str) -> pd.DataFrame:
     """Title table with compact dtypes. Numeric columns are float32 so that
-    missing values are NaN and comparisons simply evaluate to False."""
-    df = pd.read_parquet(CACHE_DIR / "titles.parquet")
-    df["title_type"] = df["title_type"].astype(
-        pd.CategoricalDtype([t for t in TITLE_TYPES]))
-    for col in ("year", "end_year", "runtime", "rating", "votes", "episodes", "seasons"):
-        df[col] = df[col].astype("float32")
-    df["tid"] = df["tid"].astype("int32")
-    df["genre_mask"] = df["genre_mask"].astype("int32")
+    missing values are NaN and comparisons simply evaluate to False.
+    Converted in Arrow to keep peak memory low; callers must not mutate it."""
+    floats = ("year", "end_year", "runtime", "rating", "votes", "episodes", "seasons")
+    t = pq.read_table(CACHE_DIR / "titles.parquet")
+    t = t.cast(pa.schema([f.with_type(pa.float32()) if f.name in floats else f
+                          for f in t.schema]))
+    # Most original titles repeat the title; store those as missing.
+    i = t.schema.get_field_index("original_title")
+    t = t.set_column(i, "original_title", pc.if_else(
+        pc.equal(t["original_title"], t["title"]), None, t["original_title"]))
+    df = t.to_pandas(self_destruct=True, split_blocks=True)
+    del t
+    df["title_type"] = df["title_type"].astype(pd.CategoricalDtype(TITLE_TYPES))
     return df.set_index("tid", drop=False)
 
 
