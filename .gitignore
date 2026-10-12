@@ -1,0 +1,9 @@
+.venv/
+.imdb_cache/
+__pycache__/
+*.tsv
+*.tsv.gz
+.cache/
+.remember/
+.DS_Store
+Presentation_Plan.pdf
